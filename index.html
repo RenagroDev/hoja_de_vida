@@ -1955,5 +1955,91 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
     }
   </script>
 </form>
-<div id="sr-status-message" class="sr-only" role="status" aria-live="polite" style="font-size: 0;"></div></body>
+<div id="sr-status-message" class="sr-only" role="status" aria-live="polite" style="font-size: 0;"></div>
+
+<script>
+
+  
+  function esCedulaValida(cedula) {
+        if (!/^\d{10}$/.test(cedula)) return false;
+        const prov = parseInt(cedula.substring(0, 2));
+        if (prov < 1 || prov > 24) return false;
+        let suma = 0;
+        for (let i = 0; i < 9; i++) {
+            let d = parseInt(cedula.charAt(i));
+            if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
+            suma += d;
+        }
+        const verificador = (Math.ceil(suma / 10) * 10) - suma;
+        const ultimo = parseInt(cedula.charAt(9));
+        return (verificador === 10 ? 0 : verificador) === ultimo;
+    }
+
+  function validarCedulaPersonal(){
+    const inputCedula = document.getElementById("input_324_full");
+    
+    // valida cedula y bloquea el boton siguiente si es incorrecta
+
+    function gestionarBotonSiguiente(bloquear) {
+        // Buscamos el botón de la página actual
+        const botonSiguiente = inputCedula.closest(".form-section").querySelector(".form-pagebreak-next");
+        
+        if (botonSiguiente) {
+            botonSiguiente.disabled = bloquear;
+            // Estética: bajamos la opacidad si está bloqueado
+            botonSiguiente.style.opacity = bloquear ? "0.5" : "1";
+            botonSiguiente.style.cursor = bloquear ? "not-allowed" : "pointer";
+        }
+    }
+
+    function gestionarErrorNativo(elemento, mensaje, mostrar) {
+        const contenedorLinea = elemento.closest(".form-line");
+        gestionarBotonSiguiente(mostrar); // Bloquea si hay error, desbloquea si no
+        
+        if (mostrar) {
+            contenedorLinea.classList.add("form-line-error");
+            let errorDiv = contenedorLinea.querySelector(".form-error-message");
+            if (!errorDiv) {
+                errorDiv = document.createElement("div");
+                errorDiv.className = "form-error-message";
+                contenedorLinea.appendChild(errorDiv);
+            }
+            errorDiv.innerHTML = '<span class="form-error-arrow"></span><div class="form-error-content">' + mensaje + '</div>';
+            errorDiv.style.display = "block";
+        } else {
+            contenedorLinea.classList.remove("form-line-error");
+            const errorDiv = contenedorLinea.querySelector(".form-error-message");
+            if (errorDiv) errorDiv.style.display = "none";
+        }
+    }
+   
+    // Escuchar mientras el usuario escribe (input) para bloquear rápido
+    inputCedula.addEventListener("input", function() {
+        const valor = this.value.trim();
+        if (valor.length === 10) {
+            if (!esCedulaValida(valor)) {
+                gestionarErrorNativo(inputCedula, "Cédula ecuatoriana incorrecta", true);
+            } else {
+                gestionarErrorNativo(inputCedula, "", false);
+            }
+        } else {
+            // Si no tiene 10 dígitos, bloqueamos preventivamente el botón
+            gestionarBotonSiguiente(true);
+        }
+    });
+
+    // Validación final al salir del campo
+    inputCedula.addEventListener("change", function() {
+        const valor = this.value.trim();
+        if (valor === "" || !esCedulaValida(valor)) {
+            gestionarErrorNativo(inputCedula, "Cédula ecuatoriana incorrecta", true);
+        }
+    });
+  }
+
+document.addEventListener("DOMContentLoaded", function() {
+   validarCedulaPersonal();
+});
+</script>
+</body>
 </html><script type="text/javascript">JotForm.ownerView=true;</script><script type="text/javascript">JotForm.isNewSACL=true;</script>
