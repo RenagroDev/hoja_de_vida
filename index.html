@@ -1989,6 +1989,13 @@ JotForm.paymentExtrasOnTheFly([null,{"name":"heading","qid":"1","text":"Formular
             // Estética: bajamos la opacidad si está bloqueado
             botonSiguiente.style.opacity = bloquear ? "0.5" : "1";
             botonSiguiente.style.cursor = bloquear ? "not-allowed" : "pointer";
+            //enviar mensaje a label sobre el boton
+              const pageInfo = inputCedula.closest(".form-section").querySelector(".pageInfo");
+              if (pageInfo) {
+                  pageInfo.textContent = bloquear ? "Por favor, ingrese una cédula válida para continuar" : "";
+                  pageInfo.style.color = "red";
+              }
+
         }
     }
 
